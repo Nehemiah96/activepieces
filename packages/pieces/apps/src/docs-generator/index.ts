@@ -52,7 +52,7 @@ const getPieceCards = (items: Record<string, ActionBase>) => {
 }
 
 /** returns the mint.json navigation path for the docs */
-const writePieceDoc = async (appsDocsFolderPath:string, p: PieceInfo, mdxTemplate: string) => {
+const writePieceDoc = async (appsDocsFolderPath: string, p: PieceInfo, mdxTemplate: string) => {
   let docsFile = mdxTemplate.replace('TITLE', p.displayName);
   let actionsCards = getPieceCards(p.actions);
   if (!actionsCards) {
@@ -94,9 +94,29 @@ const writeAppsOverView = async (pieces: PieceInfo[]) => {
 
 const main = async () => {
   const pieces = await loadPiecesMetadata();
+  //
+  const json: any[] = [];
+  pieces.forEach(piece => {
+    json.push({
+      pieceName: piece.name,
+      pieceVersion: piece.version,
+      actions: [...Object.keys(piece.actions)],
+      triggers: [...Object.keys(piece.triggers)],
+    })
+  });
+  console.log(json);
+  //
   const mintJson: { navigation: { group: string; pages: string[] }[] } =
     JSON.parse(await readFile('./docs/mint.json', 'utf8'));
 
+  const data: any[] = [];
+
+  const f = data.map(d => {
+    return {
+      role: "system",
+      content: JSON.stringify(d)
+    }
+  });
   const appsDocsFolderPath = 'pieces/apps';
   const TEMPLATE_MDX = await readFile('packages/pieces/apps/src/docs-generator/template.mdx', 'utf8');
   const appsDocsFilesPaths: string[] = [];
@@ -133,3 +153,4 @@ const main = async () => {
 };
 
 main();
+

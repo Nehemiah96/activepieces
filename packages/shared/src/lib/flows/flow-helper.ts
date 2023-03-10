@@ -115,6 +115,7 @@ function updateAction(
     }
   }
   if (!updated) {
+    console.log("Asdasdas");
     throw new ActivepiecesError({
       code: ErrorCode.FLOW_OPERATION_INVALID,
       params: {}
@@ -133,6 +134,7 @@ function extractActions(step: Trigger | Action): { nextAction: Action, onSuccess
 function addAction(flowVersion: FlowVersion, request: AddActionRequest): void {
   const parentStep = getAllSteps(flowVersion).find(step => step.name === request.parentStep);
   if (parentStep === undefined) {
+    console.log("fffff " + request.parentStep);
     throw new ActivepiecesError({
       code: ErrorCode.FLOW_OPERATION_INVALID,
       params: {}
@@ -154,6 +156,7 @@ function addAction(flowVersion: FlowVersion, request: AddActionRequest): void {
       }, `Branch ${request.stepLocationRelativeToParent} not found`);
     }
   } else {
+    console.log("what " + request.parentStep);
     parentStep.nextAction = createAction(request.action, parentStep.nextAction);
   }
 }
@@ -204,6 +207,7 @@ function createAction(
       };
       break;
   }
+  console.log("asdsa");
   action.valid = (request.valid ?? true) && actionSchemaValidator.Check(action);
   return action;
 }

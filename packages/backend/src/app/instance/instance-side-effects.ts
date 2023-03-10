@@ -78,6 +78,9 @@ export const instanceSideEffects = {
     async onFlowDelete({projectId, flowId}: {projectId: ProjectId, flowId: FlowId}) {
         const flow = await flowService.getOneOrThrow({projectId, id: flowId});
         const instance = await instanceService.getByCollectionId({ projectId: projectId, collectionId: flow.collectionId });
+        if(instance === null) {
+            return;
+        }
         const flowVersionId = instance.flowIdToVersionId[flow.id];
         if (instance !== null && flowVersionId != null) {
             const collectionVersion = (await collectionVersionService.getOneOrThrow(instance.collectionVersionId));

@@ -1,0 +1,37 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
+import { map, Observable, tap } from 'rxjs';
+import { Flow } from '../../../../../../../../../shared/src';
+import { FlowService } from '../../../../../common/service/flow.service';
+
+@Component({
+  templateUrl: './magic-flow-dialog.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class MagicWandDialogComponent {
+  promptForm: FormGroup<{ prompt: FormControl<string> }>;
+  guessAi$: Observable<Flow>;
+  loading = false;
+  constructor(private formBuilder: FormBuilder, private flowService: FlowService, private dialogRef: MatDialogRef<MagicWandDialogComponent>) {
+    this.promptForm = this.formBuilder.group({
+      prompt: new FormControl('', {
+        nonNullable: true,
+        validators: [Validators.required],
+      }),
+    });
+  }
+  guessAi() {
+    this.loading = true;
+
+    this.guessAi$ = this.flowService.guessFlow(this.promptForm.value.prompt!).pipe(tap(() => {
+      this.loading = false;
+      this.dialogRef.close()
+    }, map(() => void 0)));
+  }
+}

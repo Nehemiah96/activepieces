@@ -5,6 +5,8 @@ import { AuthenticationService } from '../../../../../common/service/authenticat
 
 import { map, Observable, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { MagicWandDialogComponent } from '../magic-wand-dialog/magic-flow-dialog.component';
 
 @Component({
   selector: 'app-feedback',
@@ -18,6 +20,7 @@ export class FeedbackComponent {
   sendingFeedback = false;
   openFeedbackPopOver$: Observable<void>;
   constructor(
+    public dialog: MatDialog,
     public authenticationService: AuthenticationService,
     private snackbarService: MatSnackBar
   ) {
@@ -29,6 +32,10 @@ export class FeedbackComponent {
         })
       );
   }
+  guessAi() {
+    this.dialog.open(MagicWandDialogComponent);
+  }
+
   sendFeedback() {
     if (this.feedbackControl.value) {
       this.sendingFeedback = true;

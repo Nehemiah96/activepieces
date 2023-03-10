@@ -74,6 +74,7 @@ import { BranchLineConnectionComponent } from './page/flow-builder/flow-item-tre
 import { CanvasPannerDirective } from './page/flow-builder/canvas-utils/panning/panner.directive';
 import { BranchStepInputFormComponent } from './page/flow-builder/flow-right-sidebar/edit-step-sidebar/edit-step-accordion/input-forms/branch-step-input-form/branch-step-input-form.component';
 import { CanvasUtilsComponent } from './page/flow-builder/canvas-utils/canvas-utils.component';
+import { MagicWandDialogComponent } from './page/flow-builder/flow-builder-header/magic-wand-dialog/magic-flow-dialog.component';
 
 @NgModule({
   imports: [
@@ -161,6 +162,7 @@ import { CanvasUtilsComponent } from './page/flow-builder/canvas-utils/canvas-ut
     CanvasPannerDirective,
     BranchStepInputFormComponent,
     CanvasUtilsComponent,
+    MagicWandDialogComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   exports: [FlowBuilderHeaderComponent],

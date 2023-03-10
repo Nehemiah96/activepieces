@@ -90,7 +90,7 @@ export const collectionController = async (fastify: FastifyInstance) => {
         Querystring: ListCollectionsRequest;
       }>
         ) => {
-            return await collectionService.list(request.query.projectId, request.query.cursor, request.query.limit ?? DEFAULT_PAGE_SIZE);
+            return await collectionService.list(request.principal.projectId, request.query.cursor, request.query.limit ?? DEFAULT_PAGE_SIZE);
         }
     );
 

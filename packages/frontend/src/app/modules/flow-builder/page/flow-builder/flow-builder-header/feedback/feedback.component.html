@@ -1,8 +1,12 @@
+<app-button btnStyle="basic" btnColor="basic" btnSize="medium" (click)="guessAi()">
+    <div class="ap-flex ap-items-center ap-font-semibold">
+        🪄 Magic Wand
+    </div>
+</app-button>
 <app-button [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger" btnStyle="basic" btnColor="basic" btnSize="medium">
     <div class="ap-flex ap-items-center ap-font-semibold">
         📣 Feedback
     </div>
-
 </app-button>
 <mat-menu #menu="matMenu" xPosition="before">
     <div (click)="$event.stopPropagation()"

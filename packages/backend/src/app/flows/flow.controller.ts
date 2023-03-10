@@ -1,18 +1,82 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import {
+    Action,
     CreateFlowRequest,
     FlowId,
     FlowOperationRequest,
+    FlowOperationType,
     FlowVersionId,
     ListFlowsRequest,
+    Trigger,
 } from "@activepieces/shared";
 import { StatusCodes } from "http-status-codes";
 import { ActivepiecesError, ErrorCode } from "@activepieces/shared";
 import { flowService } from "./flow.service";
+import { GuessFlowRequest } from "../../../../shared/src/lib/flows/dto/create-flow-request";
+import { guessTrigger } from "../helper/openai";
+import { logger } from "../helper/logger";
 
 const DEFUALT_PAGE_SIZE = 10;
 
 export const flowController = async (fastify: FastifyInstance) => {
+    fastify.post(
+        "/guess",
+        {
+            schema: {
+                body: GuessFlowRequest
+            },
+        },
+        async (
+            request: FastifyRequest<{
+                Body: GuessFlowRequest;
+            }>
+        ) => {
+            const trigger = await guessTrigger(request.body.prompt);
+            const flow = await flowService.create({
+                    projectId: request.principal.projectId, request: {
+                    displayName: request.body.displayName,
+                    collectionId: request.body.collectionId
+                }
+            });
+            console.log(trigger);
+            logger.info("flow created", flow);
+            trigger.name = "trigger";
+            flowService.update({
+                flowId: flow.id,
+                projectId: request.principal.projectId,
+                request: {
+                    type: FlowOperationType.UPDATE_TRIGGER,
+                    request: trigger
+                }
+            });
+            logger.info("trigger updated", trigger);
+            let parentStep = trigger.name;
+            let currentStep = trigger.nextAction;
+            let count = 0;
+            while (currentStep !== undefined) {
+                logger.info("action added");
+                console.log(currentStep);
+                count++;
+                currentStep.name = `step-${count}`;
+                currentStep.settings.input = {};
+                await flowService.update({
+                    flowId: flow.id,
+                    projectId: request.principal.projectId,
+                    request: {
+                        type: FlowOperationType.ADD_ACTION,
+                        request: {
+                            parentStep: parentStep,
+                            action: currentStep
+                        }
+                    }
+                });
+                parentStep = currentStep.name;
+                currentStep = currentStep.nextAction;
+            }
+            return flowService.getOne({ id: flow.id, versionId: undefined, projectId: request.principal.projectId, includeArtifacts: false });
+        }
+    );
+
     fastify.post(
         "/",
         {
