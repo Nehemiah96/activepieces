@@ -46,15 +46,23 @@ const app = fastify({
 });
 
 app.register(swagger, {
+    hideUntagged: true,
+  
     openapi: {
         info: {
             title: 'Activepieces Documentation',
             version: "0.3.6",
         },
+        servers: [
+            {
+                url: 'http://localhost:8080/api',
+                description: 'Self hosted'
+            }
+        ],
         externalDocs: {
             url: 'https://www.activepieces.com/docs',
             description: 'Find more info here'
-        },
+        }
     }
 });
 
@@ -78,7 +86,7 @@ app.addHook("onRequest", async (request, reply) => {
     });
     if (!route) {
         reply.code(404).send(`Oops! It looks like we hit a dead end. The endpoint you're searching for is nowhere to be found. We suggest turning around and trying another path. Good luck!`);
-    } 
+    }
 });
 
 app.addHook("onRequest", tokenVerifyMiddleware);
@@ -121,7 +129,7 @@ const start = async () => {
         await validateEnvPropsOnStartup();
         await databaseConnection.initialize();
         await databaseConnection.runMigrations();
-            
+
         const edition = await getEdition();
         logger.info("Activepieces " + (edition == ApEdition.ENTERPRISE ? 'Enterprise' : 'Community') + " Edition");
         if (edition === ApEdition.ENTERPRISE) {

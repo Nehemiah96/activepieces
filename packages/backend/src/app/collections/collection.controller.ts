@@ -1,21 +1,22 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { collectionService } from "./collection.service";
 import {
-    CollectionId,
+    Collection,
     CreateCollectionRequest,
     ListCollectionsRequest,
+    SeekPage,
     UpdateCollectionRequest
 } from "@activepieces/shared";
 import { StatusCodes } from "http-status-codes";
 import { ActivepiecesError, ErrorCode } from "@activepieces/shared";
 import { Static, Type } from "@sinclair/typebox";
 
-const DEFAULT_PAGE_SIZE = 10;
-
 const CollectionIdParams = Type.Object({
     collectionId: Type.String(),
 });
 type CollectionIdParams = Static<typeof CollectionIdParams>;
+
+const DEFAULT_PAGE_SIZE = 10;
 
 
 export const collectionController = async (fastify: FastifyInstance) => {
@@ -27,6 +28,9 @@ export const collectionController = async (fastify: FastifyInstance) => {
                 tags: ["collection"],
                 summary: "Delete a collection",
                 params: CollectionIdParams,
+                response: {
+                    200: {}
+                }
             }
         },
         async (
@@ -42,11 +46,20 @@ export const collectionController = async (fastify: FastifyInstance) => {
 
     fastify.get(
         "/:collectionId",
+        {
+            schema: {
+                description: "Get a collection",
+                tags: ["collection"],
+                summary: "Get a collection",
+                params: CollectionIdParams,
+                response: {
+                    200: Collection
+                }
+            }
+        },
         async (
             request: FastifyRequest<{
-                Params: {
-                    collectionId: CollectionId;
-                };
+                Params: CollectionIdParams
             }>
         ) => {
             const collection = await collectionService.getOne({ id: request.params.collectionId, projectId: request.principal.projectId });
@@ -64,18 +77,23 @@ export const collectionController = async (fastify: FastifyInstance) => {
         "/:collectionId",
         {
             schema: {
-                body: UpdateCollectionRequest
+                description: "Update a collection",
+                tags: ["collection"],
+                summary: "Update a collection",
+                params: CollectionIdParams,
+                body: UpdateCollectionRequest,
+                response: {
+                    200: Collection
+                }
             },
         },
         async (
             request: FastifyRequest<{
-                Params: {
-                    collectionId: CollectionId;
-                };
+                Params: CollectionIdParams;
                 Body: UpdateCollectionRequest;
             }>
         ) => {
-            const collection = await collectionService.getOne({ id: request.params.collectionId,projectId: request.principal.projectId });
+            const collection = await collectionService.getOne({ id: request.params.collectionId, projectId: request.principal.projectId });
             if (collection === null) {
                 throw new ActivepiecesError({
                     code: ErrorCode.COLLECTION_NOT_FOUND,
@@ -94,6 +112,9 @@ export const collectionController = async (fastify: FastifyInstance) => {
                 tags: ["collection"],
                 summary: "List Collections",
                 querystring: ListCollectionsRequest,
+                response: {
+                    200: SeekPage(Collection)
+                }
             },
         },
         async (
@@ -109,7 +130,13 @@ export const collectionController = async (fastify: FastifyInstance) => {
         "/",
         {
             schema: {
-                body: CreateCollectionRequest
+                description: "Create a collection",
+                tags: ["collection"],
+                summary: "Create a collection",
+                body: CreateCollectionRequest,
+                response: {
+                    200: Collection
+                }
             },
         },
         async (

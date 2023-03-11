@@ -1,13 +1,19 @@
-import {BaseModel} from "../common/base-model";
-import {CollectionId} from "../collections/collection";
-import {ApId} from "../common/id-generator";
-import {FlowVersion} from "./flow-version";
-import { ProjectId } from "../project/project";
+import { ApId } from "../common/id-generator";
+import { FlowVersion } from "./flow-version";
+import { Type, Static } from "@sinclair/typebox";
+import { BaseModelSchema } from "../common/base-model";
 
 export type FlowId = ApId;
 
-export interface Flow extends BaseModel<FlowId> {
-    projectId: ProjectId;
-    collectionId: CollectionId;
-    version: FlowVersion | null;
-}
+export const Flow = Type.Object({
+    ...BaseModelSchema,
+    projectId: Type.String({
+        example: "9m7dpndtY3IUvUvCv5WY0",
+    }),
+    collectionId: Type.String({
+        example: "517dpndtY3IU2UvCv5WY0",
+    }),
+    version: FlowVersion,
+})
+
+export type Flow = Static<typeof Flow> & { version: FlowVersion | null };

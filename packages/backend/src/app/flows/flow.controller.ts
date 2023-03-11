@@ -1,14 +1,21 @@
 import { FastifyInstance, FastifyRequest } from "fastify";
 import {
     CreateFlowRequest,
-    FlowId,
     FlowOperationRequest,
     FlowVersionId,
     ListFlowsRequest,
+    SeekPage,
 } from "@activepieces/shared";
 import { StatusCodes } from "http-status-codes";
 import { ActivepiecesError, ErrorCode } from "@activepieces/shared";
 import { flowService } from "./flow.service";
+import { Static, Type } from "@sinclair/typebox";
+import { Flow } from "@activepieces/shared";
+
+const FlowIdParams = Type.Object({
+    flowId: Type.String(),
+});
+type FlowIdParams = Static<typeof FlowIdParams>;
 
 const DEFUALT_PAGE_SIZE = 10;
 
@@ -17,7 +24,13 @@ export const flowController = async (fastify: FastifyInstance) => {
         "/",
         {
             schema: {
-                body: CreateFlowRequest
+                summary: "Create a flow",
+                description: "Create a flow",
+                tags: ["flow"],
+                body: CreateFlowRequest,
+                response: {
+                    200: Flow
+                }
             },
         },
         async (
@@ -33,14 +46,19 @@ export const flowController = async (fastify: FastifyInstance) => {
         "/:flowId",
         {
             schema: {
+                summary: "Update a flow",
+                description: "Update a flow",
+                tags: ["flow"],
+                params: FlowIdParams,
                 body: FlowOperationRequest,
+                response: {
+                    200: Flow
+                }
             },
         },
         async (
             request: FastifyRequest<{
-                Params: {
-                    flowId: FlowId;
-                };
+                Params: FlowIdParams;
                 Body: FlowOperationRequest;
             }>
         ) => {
@@ -56,7 +74,13 @@ export const flowController = async (fastify: FastifyInstance) => {
         "/",
         {
             schema: {
-                querystring: ListFlowsRequest
+                summary: "List flows",
+                description: "List flows",
+                tags: ["flow"],
+                querystring: ListFlowsRequest,
+                response: {
+                    200: SeekPage(Flow)
+                }
             },
         },
         async (
@@ -70,11 +94,24 @@ export const flowController = async (fastify: FastifyInstance) => {
 
     fastify.get(
         "/:flowId",
+        {
+            schema: {
+                summary: "Get a flow",
+                description: "Get a flow",
+                tags: ["flow"],
+                params: FlowIdParams,
+                querystring: {
+                    versionId: Type.String(),
+                    includeArtifacts: Type.Boolean()
+                },
+                response: {
+                    200: Flow
+                }
+            }
+        },
         async (
             request: FastifyRequest<{
-                Params: {
-                    flowId: FlowId;
-                };
+                Params: FlowIdParams;
                 Querystring: {
                     versionId: FlowVersionId | undefined;
                     includeArtifacts: boolean | undefined;
@@ -93,16 +130,25 @@ export const flowController = async (fastify: FastifyInstance) => {
 
     fastify.delete(
         "/:flowId",
+        {
+            schema: {
+                summary: "Delete a flow",
+                description: "Delete a flow",
+                tags: ["flow"],
+                params: FlowIdParams,
+                response: {
+                    200: {}
+                }
+            }
+        },
         async (
             request: FastifyRequest<{
-                Params: {
-                    flowId: FlowId;
-                };
+                Params: FlowIdParams;
             }>,
-            _reply
+            reply
         ) => {
             await flowService.delete({ projectId: request.principal.projectId, flowId: request.params.flowId });
-            _reply.status(StatusCodes.OK).send();
+            reply.status(StatusCodes.OK).send();
         }
     );
 };

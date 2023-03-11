@@ -10,6 +10,10 @@ export interface Collection extends BaseModel<CollectionId> {
 
 export const Collection = Type.Object({
   ...BaseModelSchema,
-  projectId: Type.String(),
-  displayName: Type.String(),
+  projectId: Type.String({
+    example: "9m7dpndtY3IUvUvCv5WY0",
+  }),
+  displayName: Type.String({
+    example: "Collection",
+  }),
 })

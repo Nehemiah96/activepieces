@@ -44,9 +44,34 @@
       "name": "Discord",
       "icon": "discord",
       "url": "https://discord.gg/2jUXBKDdP8"
+    },
+    {
+      "name": "API Reference",
+      "icon": "cloud",
+      "url": "api-reference"
     }
   ],
   "navigation": [
+    {
+      "group": "Collection",
+      "pages": [
+        "api-reference/collection/create-collection",
+        "api-reference/collection/get-collection",
+        "api-reference/collection/list-collection",
+        "api-reference/collection/update-collection",
+        "api-reference/collection/delete-collection"
+      ]
+    },
+    {
+      "group": "Flow",
+      "pages": [
+        "api-reference/flow/create-flow",
+        "api-reference/flow/get-flow",
+        "api-reference/flow/list-flow",
+        "api-reference/flow/update-flow",
+        "api-reference/flow/delete-flow"
+      ]
+    },
     {
       "group": "Overview",
       "pages": [
