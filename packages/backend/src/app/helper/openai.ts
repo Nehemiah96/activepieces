@@ -24,21 +24,31 @@ export async function guessTrigger(prompt: string): Promise<Trigger> {
             {
                 role: "system",
                 content: `
+        Example Flow where there is webhook trigger and branching on condition then sends email if false
+        {"trigger":{"type":"WEBHOOK","valid":true,"settings":{},"nextAction":{"type":"BRANCH","valid":true,"settings":{"conditions":[[{"operator":"NUMBER_IS_GREATER_THAN","firstValue":"\${trigger.body.age}","secondValue":"17"}]]},"displayName":"Branch Greater 17","onFailureAction":{"type":"PIECE","valid":false,"settings":{"input":{},"pieceName":"gmail","actionName":"send_email","pieceVersion":"0.0.0"},"displayName":"Gmail"}},"displayName":"Webhook Trigger"}}`
+            },
+            {
+                role: "system",
+                content: `
+        Webhook Trigger
+        {"trigger":{"type":"WEBHOOK","valid":true,"settings":{},"displayName":"Webhook Trigger"}}`
+            },
+            {
+                role: "system",
+                content: `
+        Scheduling trigger every 5 minutes
+        {"trigger":{"type":"SCHEDULE","valid":true,"settings":{"cronExpression":"0/5 * * * *"},"displayName":"Every 5 Min"}}`
+            },
+            {
+                role: "system",
+                content: `
         When there is new message on slack It sends new message for discord, this the flow json
         {"trigger":{"type":"PIECE_TRIGGER","valid":true,"settings":{"pieceName":"slack","triggerName":"new_message","pieceVersion":"0.0.0", "input": {}},"nextAction":{"type":"PIECE","valid":true,"settings":{"pieceName":"discord","actionName":"send_message_webhook","pieceVersion":"0.0.0", "input":{}},"displayName":"Send Message"},"displayName":"Trigger"},"valid":true}`
             },
             ...piecesData,
             {
-                role: "system",
-                content: `All values of actionName and triggerName are provided in this conversation`
-            },
-            {
-                role: "system",
-                content: `You only allowed to reply the flow json and no extra words outside json`
-            },
-            {
                 role: "user",
-                content: `Write me the json for the flow that ${prompt}`
+                content: `The values for actionName and triggerName for each piece_name have been provided above don't use anything outside these values, and only relevant information should be included in the JSON code snippet. generate a JSON code snippet and don't fill input property for the flow that ${prompt}.`
             }],
         temperature: 0.3,
         top_p: 1,
