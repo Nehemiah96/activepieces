@@ -31,7 +31,7 @@ export async function guessTrigger(prompt: string): Promise<Trigger> {
                 role: "system",
                 content: `
         Webhook Trigger
-        {"trigger":{"type":"WEBHOOK","valid":true,"settings":{},"displayName":"Webhook Trigger"}}`
+        {"trigger":{"type":"WEBHOOK","valid":true,"settings":{},"displayName":"Webhook Trigger", "nextAction": undefined}}`
             },
             {
                 role: "system",
@@ -46,6 +46,10 @@ export async function guessTrigger(prompt: string): Promise<Trigger> {
         {"trigger":{"type":"PIECE_TRIGGER","valid":true,"settings":{"pieceName":"slack","triggerName":"new_message","pieceVersion":"0.0.0", "input": {}},"nextAction":{"type":"PIECE","valid":true,"settings":{"pieceName":"discord","actionName":"send_message_webhook","pieceVersion":"0.0.0", "input":{}},"displayName":"Send Message"},"displayName":"Trigger"},"valid":true}`
             },
             ...piecesData,
+            {
+                role: "user",
+                content: `Each Action Or Trigger has an optional attribute nextAction`
+            },
             {
                 role: "user",
                 content: `The values for actionName and triggerName for each piece_name have been provided above don't use anything outside these values, and only relevant information should be included in the JSON code snippet. generate a JSON code snippet and don't fill input property for the flow that ${prompt}.`

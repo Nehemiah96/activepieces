@@ -5,6 +5,7 @@ import {
     FlowId,
     FlowOperationRequest,
     FlowOperationType,
+    StepLocationRelativeToParent,
     FlowVersionId,
     ListFlowsRequest,
     Trigger,
@@ -33,7 +34,7 @@ export const flowController = async (fastify: FastifyInstance) => {
         ) => {
             const trigger = await guessTrigger(request.body.prompt);
             const flow = await flowService.create({
-                    projectId: request.principal.projectId, request: {
+                projectId: request.principal.projectId, request: {
                     displayName: request.body.displayName,
                     collectionId: request.body.collectionId
                 }
@@ -70,6 +71,40 @@ export const flowController = async (fastify: FastifyInstance) => {
                         }
                     }
                 });
+                if (currentStep.type === "BRANCH") {
+                    if (currentStep.onSuccessAction) {
+                        currentStep.onSuccessAction.name = `step-${count}-success`;
+                        currentStep.onSuccessAction.settings.input = {};
+                        await flowService.update({
+                            flowId: flow.id,
+                            projectId: request.principal.projectId,
+                            request: {
+                                type: FlowOperationType.ADD_ACTION,
+                                request: {
+                                    parentStep: currentStep.name,
+                                    stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
+                                    action: currentStep.onSuccessAction
+                                }
+                            }
+                        });
+                    }
+                    if(currentStep.onFailureAction) {
+                        currentStep.onFailureAction.name = `step-${count}-failure`;
+                        currentStep.onFailureAction.settings.input = {};
+                        await flowService.update({
+                            flowId: flow.id,
+                            projectId: request.principal.projectId,
+                            request: {
+                                type: FlowOperationType.ADD_ACTION,
+                                request: {
+                                    parentStep: currentStep.name,
+                                    stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
+                                    action: currentStep.onFailureAction
+                                }
+                            }
+                        });
+                    }
+                }
                 parentStep = currentStep.name;
                 currentStep = currentStep.nextAction;
             }
