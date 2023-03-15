@@ -9,7 +9,7 @@
     <mat-form-field class="ap-w-full" appearance="outline">
       <input formControlName="prompt" matInput type="text" placeholder="On new google sheet row send notification to slack" />
     </mat-form-field>
-    <p @fadeInUp class="ap-typography-caption ap-primary" *ngIf="failed">
+    <p @fadeInUp class="ap-typography-caption ap-primary" *ngIf="loading">
       Allow the magic wand to attempt to guess your flow. Kindly be patient, as this process may take up to a minute.
     </p>
     <p @fadeInUp class="ap-typography-caption ap-text-danger" *ngIf="failed">
