@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { map, Observable, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { Flow } from '../../../../../../../../../shared/src';
 import { FlowService } from '../../../../../common/service/flow.service';
 
@@ -16,8 +16,9 @@ import { FlowService } from '../../../../../common/service/flow.service';
 })
 export class MagicWandDialogComponent {
   promptForm: FormGroup<{ prompt: FormControl<string> }>;
-  guessAi$: Observable<Flow>;
+  guessAi$: Observable<Flow | undefined>;
   loading = false;
+  failed = false;
   constructor(private formBuilder: FormBuilder, private flowService: FlowService, private dialogRef: MatDialogRef<MagicWandDialogComponent>) {
     this.promptForm = this.formBuilder.group({
       prompt: new FormControl('', {
@@ -28,10 +29,19 @@ export class MagicWandDialogComponent {
   }
   guessAi() {
     this.loading = true;
+    this.failed = false;
 
-    this.guessAi$ = this.flowService.guessFlow(this.promptForm.value.prompt!).pipe(tap(() => {
-      this.loading = false;
-      this.dialogRef.close()
-    }, map(() => void 0)));
+    this.guessAi$ = this.flowService.guessFlow(this.promptForm.value.prompt!).pipe(
+      tap(() => {
+        this.loading = false;
+        this.dialogRef.close();
+      }),
+      catchError(error => {
+        this.loading = false;
+        this.failed = true;
+        return of(void 0);
+      }),
+      map(() => void 0),
+    );
   }
 }

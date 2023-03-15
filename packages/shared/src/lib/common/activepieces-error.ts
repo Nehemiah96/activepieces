@@ -35,6 +35,7 @@ type ErrorParams =
   | TaskQuotaExeceededErrorParams
   | SystemInvalidErrorParams
   | SystemPropNotDefinedErrorParams
+  | OpenAiFailedErrorParams
   | FlowOperationErrorParams;
 
 
@@ -164,6 +165,11 @@ export type SystemPropNotDefinedErrorParams = BaseErrorParams<
   }
 >;
 
+export type OpenAiFailedErrorParams = BaseErrorParams<
+  ErrorCode.OPENAI_FAILED,
+  Record<string, never>
+>;
+
 export type FlowOperationErrorParams = BaseErrorParams<
   ErrorCode.FLOW_OPERATION_INVALID,
   Record<string, never>
@@ -207,4 +213,5 @@ export enum ErrorCode {
   TASK_QUOTA_EXCEEDED = "TASK_QUOTA_EXCEEDED",
   SYSTEM_PROP_INVALID = "SYSTEM_PROP_INVALID",
   FLOW_OPERATION_INVALID = "FLOW_OPERATION_INVALID",
+  OPENAI_FAILED = "OPENAI_FAILED",
 }

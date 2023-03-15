@@ -13,9 +13,9 @@ import {
 import { StatusCodes } from "http-status-codes";
 import { ActivepiecesError, ErrorCode } from "@activepieces/shared";
 import { flowService } from "./flow.service";
-import { GuessFlowRequest } from "../../../../shared/src/lib/flows/dto/create-flow-request";
-import { guessTrigger } from "../helper/openai";
-import { logger } from "../helper/logger";
+import { GuessFlowRequest } from "@activepieces/shared";
+import { flowGuessService } from "../helper/openai";
+import { flowVersionService } from "./flow-version/flow-version.service";
 
 const DEFUALT_PAGE_SIZE = 10;
 
@@ -32,82 +32,18 @@ export const flowController = async (fastify: FastifyInstance) => {
                 Body: GuessFlowRequest;
             }>
         ) => {
-            const trigger = await guessTrigger(request.body.prompt);
+            const trigger = await flowGuessService.guessFlow(request.body.prompt);
             const flow = await flowService.create({
                 projectId: request.principal.projectId, request: {
                     displayName: request.body.displayName,
                     collectionId: request.body.collectionId
                 }
             });
-            console.log(trigger);
-            logger.info("flow created", flow);
-            trigger.name = "trigger";
-            flowService.update({
-                flowId: flow.id,
-                projectId: request.principal.projectId,
-                request: {
-                    type: FlowOperationType.UPDATE_TRIGGER,
-                    request: trigger
-                }
-            });
-            logger.info("trigger updated", trigger);
-            let parentStep = trigger.name;
-            let currentStep = trigger.nextAction;
-            let count = 0;
-            while (currentStep !== undefined) {
-                logger.info("action added");
-                console.log(currentStep);
-                count++;
-                currentStep.name = `step-${count}`;
-                currentStep.settings.input = {};
-                await flowService.update({
-                    flowId: flow.id,
-                    projectId: request.principal.projectId,
-                    request: {
-                        type: FlowOperationType.ADD_ACTION,
-                        request: {
-                            parentStep: parentStep,
-                            action: currentStep
-                        }
-                    }
-                });
-                if (currentStep.type === "BRANCH") {
-                    if (currentStep.onSuccessAction) {
-                        currentStep.onSuccessAction.name = `step-${count}-success`;
-                        currentStep.onSuccessAction.settings.input = {};
-                        await flowService.update({
-                            flowId: flow.id,
-                            projectId: request.principal.projectId,
-                            request: {
-                                type: FlowOperationType.ADD_ACTION,
-                                request: {
-                                    parentStep: currentStep.name,
-                                    stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_TRUE_BRANCH,
-                                    action: currentStep.onSuccessAction
-                                }
-                            }
-                        });
-                    }
-                    if(currentStep.onFailureAction) {
-                        currentStep.onFailureAction.name = `step-${count}-failure`;
-                        currentStep.onFailureAction.settings.input = {};
-                        await flowService.update({
-                            flowId: flow.id,
-                            projectId: request.principal.projectId,
-                            request: {
-                                type: FlowOperationType.ADD_ACTION,
-                                request: {
-                                    parentStep: currentStep.name,
-                                    stepLocationRelativeToParent: StepLocationRelativeToParent.INSIDE_FALSE_BRANCH,
-                                    action: currentStep.onFailureAction
-                                }
-                            }
-                        });
-                    }
-                }
-                parentStep = currentStep.name;
-                currentStep = currentStep.nextAction;
-            }
+            const flowVersion = {
+                ...flow.version,
+                trigger: trigger
+            };
+            await flowVersionService.overwriteVersion(flowVersion.id, flowVersion);
             return flowService.getOne({ id: flow.id, versionId: undefined, projectId: request.principal.projectId, includeArtifacts: false });
         }
     );
