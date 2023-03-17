@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/nehemiah/test5.nehemiah-sikhosana.co.za
-    - /bin/cp -R images $DEPLOYPATH
+    - export DEPLOYPATH=/home/fineprin/public_html/activepieces
+    - /bin/cp -r * $DEPLOYPATH
